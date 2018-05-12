@@ -980,6 +980,12 @@ function Invoke-WRSWorkflow_UpdateExporter {
     [string]
     $Destination,
 
+    [Parameter(
+      Mandatory = $true
+    )]
+    [string]
+    $ExternalSwitchName,
+
     [switch]
     $PromptForClientOperatingSystems
   )
@@ -990,8 +996,8 @@ function Invoke-WRSWorkflow_UpdateExporter {
     $config = New-LoadBuilderConfiguration `
     -Name "OSUpdExp" `
     -Switches @(
-      New-LoadBuilderSwitch -Name CTPrivate  -Type Private
-      New-LoadBuilderSwitch -Name CTExternal -Type External
+      New-LoadBuilderSwitch -Name CTPrivate           -Type Private
+      New-LoadBuilderSwitch -Name $ExternalSwitchName -Type External
     ) `
     -Credentials @(
       New-LoadBuilderCredential -Domain WSUSEnv -UserName Administrator -Password 'Pa$$w0rd'
@@ -1049,7 +1055,7 @@ function Invoke-WRSWorkflow_UpdateExporter {
     -VMMemoryMaximumBytes 8gb `
     -VMNetworkAdapters @(
       "CTPrivate"
-      "CTExternal"
+      $ExternalSwitchName
     ) `
     -VMVHDs @(
       New-LoadBuilderVhd -Name WSUSData -SizeBytes 60gb
@@ -1326,7 +1332,13 @@ function Invoke-WRSWorkflow_OfficeUpdateExporter {
   [CmdletBinding(
     PositionalBinding = $false
   )]
-  param()
+  param(
+    [Parameter(
+      Mandatory = $true
+    )]
+    [string]
+    $ExternalSwitchName
+  )
   try {
     Write-Verbose "STARTED office applications update exporter."
 
@@ -1335,8 +1347,8 @@ function Invoke-WRSWorkflow_OfficeUpdateExporter {
     $config = New-LoadBuilderConfiguration `
     -Name "OfUpdExp" `
     -Switches @(
-      New-LoadBuilderSwitch -Name CTPrivate  -Type Private
-      New-LoadBuilderSwitch -Name CTExternal -Type External
+      New-LoadBuilderSwitch -Name CTPrivate           -Type Private
+      New-LoadBuilderSwitch -Name $ExternalSwitchName -Type External
     ) `
     -Credentials @(
       New-LoadBuilderCredential -Domain WSUSEnv -UserName Administrator -Password 'Pa$$w0rd'
@@ -1370,7 +1382,7 @@ function Invoke-WRSWorkflow_OfficeUpdateExporter {
     -VMMemoryMaximumBytes 8gb `
     -VMNetworkAdapters @(
       "CTPrivate"
-      "CTExternal"
+      $ExternalSwitchName
     ) `
     -VMVHDs @(
       New-LoadBuilderVhd -Name WSUSData -SizeBytes 60gb
