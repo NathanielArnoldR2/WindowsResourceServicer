@@ -559,12 +559,26 @@ $scripts.ResourceServicer = {
   Restart-Computer -Force
 }
 
-function Write-Warning ($Message) {
-  Microsoft.PowerShell.Utility\Write-Warning -Message "[$([datetime]::Now.ToString("HH:mm"))] $($Message)"
+function Write-Verbose ($Message) {
+  $stored = $Host.PrivateData.VerboseForegroundColor
+  $Host.PrivateData.VerboseForegroundColor = "White"
+  $Host.PrivateData.VerboseBackgroundColor = $Host.UI.RawUI.BackgroundColor
+
+  Microsoft.PowerShell.Utility\Write-Verbose -Message "[$([datetime]::Now.ToString("HH:mm"))] $($Message)"
+
+  $Host.PrivateData.VerboseForegroundColor = $stored
+  $Host.PrivateData.VerboseBackgroundColor = $Host.UI.RawUI.BackgroundColor
 }
 
-function Write-Verbose ($Message) {
-  Microsoft.PowerShell.Utility\Write-Verbose -Message "[$([datetime]::Now.ToString("HH:mm"))] $($Message)"
+function Write-Warning ($Message) {
+  $stored = $Host.PrivateData.WarningForegroundColor
+  $Host.PrivateData.WarningForegroundColor = "Yellow"
+  $Host.PrivateData.WarningBackgroundColor = $Host.UI.RawUI.BackgroundColor
+
+  Microsoft.PowerShell.Utility\Write-Warning -Message "[$([datetime]::Now.ToString("HH:mm"))] $($Message)"
+
+  $Host.PrivateData.WarningForegroundColor = $stored
+  $Host.PrivateData.WarningBackgroundColor = $Host.UI.RawUI.BackgroundColor
 }
 
 function Import-WRSOSData {
@@ -1159,11 +1173,11 @@ function Invoke-WRSWorkflow_UpdateExporter {
 
     $result = Start-LoadBuilder -Configuration $config -Verbose
 
-    Remove-LoadBuilderRealizedLoad -Name $config.Name
-
-    if ($result.'Processing Status' -ne "Complete") {
+    if ($result.'Processing Status' -ne "Complete" -or $null -ne $result.'Error Record') {
       throw "An error occurred while running the Update Exporter configuration."
     }
+
+    Remove-LoadBuilderRealizedLoad -Name $config.Name
 
     Write-Verbose "FINISHED windows os update exporter."
   } catch {
@@ -1519,7 +1533,7 @@ function Invoke-WRSWorkflow_OfficeUpdateExporter {
 
     Remove-LoadBuilderRealizedLoad -Name $config.Name
 
-    if ($result.'Processing Status' -ne "Complete") {
+    if ($result.'Processing Status' -ne "Complete" -or $null -ne $result.'Error Record') {
       throw "An error occurred while running the Update Exporter configuration."
     }
 
@@ -1601,7 +1615,7 @@ function Invoke-WRSWorkflow_VMResourceServicer {
     # ...after pre-existing content has been replaced.
     #Remove-LoadBuilderRealizedLoad -Name $config.Name
 
-    if ($result.'Processing Status' -ne "Complete") {
+    if ($result.'Processing Status' -ne "Complete" -or $null -ne $result.'Error Record') {
       throw "An error occurred while running the Update Exporter configuration."
     }
 
